@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sell</title>
+    <link rel="stylesheet" href="/Css/Sell.css" />
+  </head>
+  <body>
+    <h1>Create Listing</h1>
+
+    <form id="sellForm">
+      <label for="category">Category:</label>
+      <select id="category" name="category">
+        <option value="">Select Category</option>
+        <option value="women">Women</option>
+        <option value="men">Men</option>
+        <option value="girls">Girls</option>
+        <option value="boys">Boys</option>
+        <option value="baby">Baby</option>
+        <option value="home">Home</option>
+      </select>
+
+      <label for="subCategory">Subcategory:</label>
+      <select id="subCategory" name="subCategory">
+        <option value="">Select Subcategory</option>
+      </select>
+
+      <div id="sizeSection" style="display: none">
+        <label for="size">Size:</label>
+        <select id="size" name="size">
+          <option value="">Select Size</option>
+          <option value="s">Small</option>
+          <option value="m">Medium</option>
+          <option value="l">Large</option>
+        </select>
+      </div>
+
+      <label for="condition">Condition:</label>
+      <select id="condition" name="condition">
+        <option value="">Select Condition</option>
+        <option value="new">New</option>
+        <option value="used">Used</option>
+      </select>
+
+      <label for="brand">Brand:</label>
+      <input
+        type="text"
+        id="brand"
+        name="brand"
+        placeholder="Enter Brand Name"
+      />
+
+      <label for="price">Price:</label>
+      <input
+        type="text"
+        id="price"
+        name="price"
+        placeholder="Enter Price (EGP)"
+      />
+      <span id="priceError" style="color: red; display: none"></span>
+
+      <label for="details">Details:</label>
+      <textarea
+        id="details"
+        name="details"
+        rows="2"
+        placeholder="Enter Details"
+      ></textarea>
+
+      <label for="image1">Image 1:</label>
+      <input type="file" id="image1" name="image1" accept="image/*" />
+
+      <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        
+      document.addEventListener("DOMContentLoaded", function () {
+        const category = document.getElementById("category");
+        const subCategory = document.getElementById("subCategory");
+        const sizeSection = document.getElementById("sizeSection");
+        const sellForm = document.getElementById("sellForm");
+        const priceError = document.getElementById("priceError");
+
+        const subCategoryOptions = {
+          women: ["Dresses", "Tops", "Bottoms"],
+          men: ["Shirts", "Pants", "Suits"],
+          girls: ["Dresses", "Tops", "Bottoms"],
+          boys: ["Shirts", "Pants", "Suits"],
+          baby: ["Onesies", "Tops", "Bottoms"],
+          home: ["Furniture", "Decor", "Kitchen"],
+        };
+
+        category.addEventListener("change", function () {
+          const selectedCategory = category.value;
+          subCategory.innerHTML = '<option value="">Select Subcategory</option>';
+
+          if (selectedCategory) {
+            subCategoryOptions[selectedCategory].forEach((subCat) => {
+              const option = document.createElement("option");
+              option.value = subCat.toLowerCase();
+              option.textContent = subCat;
+              subCategory.appendChild(option);
+            });
+          }
+
+          if (selectedCategory === "women" || selectedCategory === "men") {
+            sizeSection.style.display = "block";
+          } else {
+            sizeSection.style.display = "none";
+          }
+        });
+
+        sellForm.addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const categoryValue = category.value;
+          const subCategoryValue = subCategory.value;
+          const sizeValue = sizeSection.style.display === "block" ? document.getElementById("size").value : null;
+          const conditionValue = document.getElementById("condition").value;
+          const brandValue = document.getElementById("brand").value;
+          const priceValue = document.getElementById("price").value;
+          const detailsValue = document.getElementById("details").value;
+          const image1Value = document.getElementById("image1").files[0];
+
+          if (!categoryValue || !subCategoryValue || !conditionValue || !brandValue || !priceValue || !detailsValue || !image1Value || (sizeSection.style.display === "block" && !sizeValue)) {
+            alert("Please fill in all the required fields.");
+            return;
+          }
+
+          if (isNaN(priceValue)) {
+            priceError.style.display = "block";
+            priceError.textContent = "Please enter a valid price.";
+            return;
+          } else {
+            priceError.style.display = "none";
+          }
+
+          const formData = new FormData();
+          formData.append("category", categoryValue);
+          formData.append("subCategory", subCategoryValue);
+          formData.append("size", sizeValue);
+          formData.append("condition", conditionValue);
+          formData.append("brand", brandValue);
+          formData.append("price", priceValue);
+          formData.append("details", detailsValue);
+          formData.append("image1", image1Value);
+
+          fetch("/sell", {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.err) {
+                alert(data.err);
+              } else {
+                alert("Listing created successfully!");
+                sellForm.reset();
+              }
+            })
+            .catch((error) => {
+              alert("Error: " + error);
+            });
+        });
+      });
+    </script>
+  </body>
+</html>

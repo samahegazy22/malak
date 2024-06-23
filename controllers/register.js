@@ -99,12 +99,11 @@ export const signup_post = async (req, res) => {
 export const login_post = async (req, res) => {
   const { username, password } = req.body;
 
+
   try {
     const founduser = await User.findOne({ username });
 
-    const isPasswordValid = bcrypt.compareSync(password, founduser.password);
-
-    if (!founduser || !isPasswordValid)
+    if (!founduser || !bcrypt.compareSync(password, founduser.password))
       return res.status(401).json({ err: "Wrong username or password" });
 
     const token = jwt.sign({ user: founduser }, process.env.JWT_SECRET_PHRASE, {

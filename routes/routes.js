@@ -1,15 +1,12 @@
 import registerRoutes from "./register.js";
-import adminRoutes from "./admin.js";
-import productRoutes from "./product.js";
 import express from "express";
-import adminAuth from "../middleware/adminAuth.js";
 const router = express.Router();
 
 router.use("/", registerRoutes);
-router.use("/admin", adminAuth, adminRoutes);
+
   
 router.get("/", (req, res) => {
-  res.render("Thrifting", { title: "Second Chance" });
+  res.render("index", { title: "Second Chance" });
 });
 
 router.get("/signup", (req, res) => {
